@@ -23,12 +23,15 @@ pipeline {
 
     stage('Docker Build and Push') {
       steps {
-        withDockerRegistry([credentialsId: "docker-hub", url: ""]) {
-          sh 'printenv'
+        // withDockerRegistry([credentialsId: "docker-hub", url: ""]) {
+        //   sh 'printenv'
           // sh 'docker build -t thecodingadventure/numeric-app:""$GIT_COMMIT"" .'
           // sh 'docker push thecodingadventure/numeric-app:""$GIT_COMMIT""'
-          def newApp = docker.build "thecodingadventure/numeric-app:${GIT_COMMIT}"
-          newApp.push()
+        // }
+        withCredentials([usernamePassword(credentialsId: 'docker-hub', passwordVariable: 'DOCKER_REGISTRY_PWD', usernameVariable: 'DOCKER_REGISTRY_USER')]) {
+          sh 'printenv'
+          sh 'docker build -t thecodingadventure/numeric-app:""$GIT_COMMIT"" .'
+          sh 'docker push thecodingadventure/numeric-app:""$GIT_COMMIT""'
         }
       }
     }
