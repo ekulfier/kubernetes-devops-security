@@ -28,11 +28,15 @@ pipeline {
           sh 'docker build -t thecodingadventure/numeric-app:""$GIT_COMMIT"" .'
           sh 'docker push thecodingadventure/numeric-app:""$GIT_COMMIT""'
         }
-        // withCredentials([usernamePassword(credentialsId: 'docker-hub', passwordVariable: 'DOCKER_REGISTRY_PWD', usernameVariable: 'DOCKER_REGISTRY_USER')]) {
-        //   sh 'printenv'
-        //   sh 'docker build -t thecodingadventure/numeric-app:""$GIT_COMMIT"" .'
-        //   sh 'docker push thecodingadventure/numeric-app:""$GIT_COMMIT""'
-        // }
+      }
+    }
+
+    stage('Kubernetes Deployment - DEV') {
+      steps {
+        withKubeConfig([credentialsId: 'kubeconfig']) {
+          sh "sed -i 's#replace#thecodingadventure/numeric-app:${GIT_COMMIT}#g' k8s_deployment_service.yaml"
+          sh "kubectl apply -f k8s_deployment_service.yaml"
+        }
       }
     }
   }
